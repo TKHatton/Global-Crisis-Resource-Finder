@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Crisis Resource Finder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+
+        .privacy-badge {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 0.9em;
+        }
+
+        .emergency-alert {
+            background: #e74c3c;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .form-section {
+            padding: 40px 30px;
+        }
+
+        .step {
+            margin-bottom: 30px;
+            opacity: 1;
+            transition: all 0.3s ease;
+        }
+
+        .step.hidden {
+            opacity: 0;
+            max-height: 0;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .step h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        select, button {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            background: white;
+            transition: all 0.3s ease;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        select:focus, button:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        select:hover {
+            border-color: #bdc3c7;
+        }
+
+        /* Custom dropdown arrow */
+        select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 12px center;
+            background-repeat: no-repeat;
+            background-size: 16px;
+            padding-right: 50px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transform: translateY(0);
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results {
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border-left: 4px solid #27ae60;
+            display: none;
+        }
+
+        .results h3 {
+            color: #27ae60;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .resource-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            line-height: 1.8;
+            white-space: pre-line;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee;
+            border-left-color: #e74c3c;
+            color: #c0392b;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 0.9em;
+            border-top: 1px solid #ecf0f1;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                border-radius: 12px;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .form-section {
+                padding: 30px 20px;
+            }
+        }
+
+        /* Step indicators */
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            gap: 10px;
+        }
+
+        .step-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #e1e8ed;
+            transition: all 0.3s ease;
+        }
+
+        .step-dot.active {
+            background: #667eea;
+        }
+
+        .step-dot.completed {
+            background: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌍 Global Crisis Resource Finder</h1>
+            <p>Find immediate crisis support resources in your area</p>
+            <div class="privacy-badge">
+                🔒 Zero data storage • Complete privacy
+            </div>
+        </div>
+
+        <div class="emergency-alert">
+            🚨 IMMEDIATE EMERGENCY: Call your local emergency number (911 US, 999 UK, 112 EU)
+        </div>
+
+        <div class="form-section">
+            <div class="step-indicator">
+                <div class="step-dot active" id="dot1"></div>
+                <div class="step-dot" id="dot2"></div>
+                <div class="step-dot" id="dot3"></div>
+            </div>
+
+            <form id="crisisForm">
+                <!-- Step 1: Country Selection -->
+                <div class="step" id="step1">
+                    <h3>Step 1: Select Your Country</h3>
+                    <div class="form-group">
+                        <select id="country" required>
+                            <option value="">Choose your country...</option>
+                            <option value="US">United States</option>
+                            <option value="CA">Canada</option>
+                            <option value="UK">United Kingdom</option>
+                            <option value="AU">Australia</option>
+                            <option value="NZ">New Zealand</option>
+                            <option value="ZA">South Africa</option>
+                            <option value="IN">India</option>
+                            <option value="NP">Nepal</option>
+                            <option value="UG">Uganda</option>
+                            <option value="KE">Kenya</option>
+                            <option value="DE">Germany</option>
+                            <option value="FR">France</option>
+                            <option value="IT">Italy</option>
+                            <option value="ES">Spain</option>
+                            <option value="BR">Brazil</option>
+                            <option value="JP">Japan</option>
+                            <option value="KR">South Korea</option>
+                            <option value="CN">China</option>
+                            <option value="OTHER">My country isn't listed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Step 2: Region Selection -->
+                <div class="step hidden" id="step2">
+                    <h3>Step 2: Select Your Region</h3>
+                    <div class="form-group">
+                        <select id="region">
+                            <option value="">Choose your region...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Step 3: Crisis Type Selection -->
+                <div class="step hidden" id="step3">
+                    <h3>Step 3: Type of Support (Optional)</h3>
+                    <div class="form-group">
+                        <select id="crisisType">
+                            <option value="all">Show me all crisis support options</option>
+                            <option value="general">General crisis support</option>
+                            <option value="suicide">Suicide prevention</option>
+                            <option value="domestic">Domestic violence</option>
+                            <option value="sexual">Sexual assault</option>
+                            <option value="substance">Substance abuse emergency</option>
+                            <option value="child">Child safety</option>
+                            <option value="lgbtq">LGBTQ+ crisis</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        Find Crisis Resources
+                    </button>
+                </div>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Finding crisis resources...</p>
+            </div>
+
+            <div class="results" id="results">
+                <h3>🆘 Crisis Support Resources</h3>
+                <div class="resource-content" id="resourceContent"></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Providing safe access to crisis support worldwide • No personal information stored
+        </div>
+    </div>
+
+    <script>
+        const countryRegions = {
+            'US': ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'],
+            'CA': ['Alberta', 'British Columbia', 'Manitoba', 'New Brunswick', 'Newfoundland and Labrador', 'Northwest Territories', 'Nova Scotia', 'Nunavut', 'Ontario', 'Prince Edward Island', 'Quebec', 'Saskatchewan', 'Yukon'],
+            'UK': ['England', 'Scotland', 'Wales', 'Northern Ireland'],
+            'AU': ['Australian Capital Territory', 'New South Wales', 'Northern Territory', 'Queensland', 'South Australia', 'Tasmania', 'Victoria', 'Western Australia'],
+            'IN': ['Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Delhi', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal']
+        };
+
+        const elements = {
+            country: document.getElementById('country'),
+            region: document.getElementById('region'),
+            crisisType: document.getElementById('crisisType'),
+            form: document.getElementById('crisisForm'),
+            loading: document.getElementById('loading'),
+            results: document.getElementById('results'),
+            resourceContent: document.getElementById('resourceContent'),
+            step1: document.getElementById('step1'),
+            step2: document.getElementById('step2'),
+            step3: document.getElementById('step3'),
+            dot1: document.getElementById('dot1'),
+            dot2: document.getElementById('dot2'),
+            dot3: document.getElementById('dot3')
+        };
+
+        function updateStepIndicator(currentStep) {
+            elements.dot1.className = currentStep >= 1 ? 'step-dot completed' : 'step-dot';
+            elements.dot2.className = currentStep >= 2 ? (currentStep === 2 ? 'step-dot active' : 'step-dot completed') : 'step-dot';
+            elements.dot3.className = currentStep >= 3 ? 'step-dot active' : 'step-dot';
+        }
+
+        elements.country.addEventListener('change', function() {
+            const country = this.value;
+            
+            if (country) {
+                // Clear previous regions
+                elements.region.innerHTML = '<option value="">Choose your region...</option>';
+                
+                // Add regions for selected country
+                if (countryRegions[country]) {
+                    countryRegions[country].forEach(region => {
+                        const option = document.createElement('option');
+                        option.value = region;
+                        option.textContent = region;
+                        elements.region.appendChild(option);
+                    });
+                } else {
+                    // For countries without specific regions
+                    const option = document.createElement('option');
+                    option.value = 'national';
+                    option.textContent = 'National resources';
+                    elements.region.appendChild(option);
+                    elements.region.value = 'national';
+                }
+                
+                // Show step 2
+                elements.step2.classList.remove('hidden');
+                updateStepIndicator(2);
+                
+                // If no regions needed, auto-show step 3
+                if (!countryRegions[country]) {
+                    setTimeout(() => {
+                        elements.step3.classList.remove('hidden');
+                        updateStepIndicator(3);
+                    }, 300);
+                }
+            } else {
+                elements.step2.classList.add('hidden');
+                elements.step3.classList.add('hidden');
+                updateStepIndicator(1);
+            }
+        });
+
+        elements.region.addEventListener('change', function() {
+            if (this.value) {
+                elements.step3.classList.remove('hidden');
+                updateStepIndicator(3);
+            }
+        });
+
+        elements.form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const country = elements.country.value;
+            const region = elements.region.value;
+            const crisisType = elements.crisisType.value;
+            
+            // Show loading
+            elements.loading.style.display = 'block';
+            elements.results.style.display = 'none';
+            
+            // Make request to n8n webhook
+            fetch('https://lkcreativesolutions.app.n8n.cloud/webhook-test/crisis-resources', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    country: country,
+                    region: region,
+                    crisisType: crisisType
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                elements.loading.style.display = 'none';
+                elements.resourceContent.innerHTML = data.resources;
+                elements.results.style.display = 'block';
+                elements.results.classList.remove('error');
+                
+                // Scroll to results
+                elements.results.scrollIntoView({ behavior: 'smooth' });
+            })
+            .catch(error => {
+                elements.loading.style.display = 'none';
+                elements.resourceContent.innerHTML = '<h3>❌ Error Loading Resources</h3><p>Please try again or contact emergency services directly. If this continues, there may be a technical issue with the service.</p>';
+                elements.results.style.display = 'block';
+                elements.results.classList.add('error');
+                console.error('Error:', error);
+            });
+        });
+
+        // Initialize step indicator
+        updateStepIndicator(1);
+    </script>
+</body>
+</html>
