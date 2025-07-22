@@ -442,45 +442,46 @@
             }
         });
 
-        elements.form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const country = elements.country.value;
-            const region = elements.region.value;
-            const crisisType = elements.crisisType.value;
-            
-            // Show loading
-            elements.loading.style.display = 'block';
-            elements.results.style.display = 'none';
-            
-// Make request to Netlify Function (which forwards to n8n)
-fetch('/.netlify/functions/crisis-resources', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-        country: country,
-        region: region,
-        crisisType: crisisType
-    })
-})
-.then(response => response.json())
-.then(data => {
-    elements.loading.style.display = 'none';
-    elements.resourceContent.innerHTML = data.resources;
-    elements.results.style.display = 'block';
-    elements.results.classList.remove('error');
+elements.form.addEventListener('submit', function(e) {
+    e.preventDefault();
     
-    // Scroll to results
-    elements.results.scrollIntoView({ behavior: 'smooth' });
-})
-.catch(error => {
-    elements.loading.style.display = 'none';
-    elements.resourceContent.innerHTML = '<h3>❌ Error Loading Resources</h3><p>Please try again or contact emergency services directly. If this continues, there may be a technical issue with the service.</p>';
-    elements.results.style.display = 'block';
-    elements.results.classList.add('error');
-    console.error('Error:', error);
+    const country = elements.country.value;
+    const region = elements.region.value;
+    const crisisType = elements.crisisType.value;
+    
+    // Show loading
+    elements.loading.style.display = 'block';
+    elements.results.style.display = 'none';
+    
+    // Make request to Netlify Function
+    fetch('/.netlify/functions/crisis-resources', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            country: country,
+            region: region,
+            crisisType: crisisType
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        elements.loading.style.display = 'none';
+        elements.resourceContent.innerHTML = data.resources;
+        elements.results.style.display = 'block';
+        elements.results.classList.remove('error');
+        
+        // Scroll to results
+        elements.results.scrollIntoView({ behavior: 'smooth' });
+    })
+    .catch(error => {
+        elements.loading.style.display = 'none';
+        elements.resourceContent.innerHTML = '<h3>❌ Error Loading Resources</h3><p>Please try again or contact emergency services directly. If this continues, there may be a technical issue with the service.</p>';
+        elements.results.style.display = 'block';
+        elements.results.classList.add('error');
+        console.error('Error:', error);
+    });
 });
             
 .then(response => response.json())
