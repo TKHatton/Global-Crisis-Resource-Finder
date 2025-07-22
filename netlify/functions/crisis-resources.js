@@ -29,7 +29,7 @@ exports.handler = async (event, context) => {
     const { country, region, crisisType } = JSON.parse(event.body);
 
     // Forward the request to your n8n webhook
-    const response = await fetch('https://lkcreativesolutions.app.n8n.cloud/webhook-test/crisis-resources', {
+    const response = await fetch('https://lkcreativesolutions.app.n8n.cloud/webhook/crisis-resources', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
