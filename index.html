@@ -453,18 +453,35 @@
             elements.loading.style.display = 'block';
             elements.results.style.display = 'none';
             
-            // Simulate a response since we don't have the actual Netlify function
-            // In real implementation, this would be the actual fetch call
-            setTimeout(() => {
-                elements.loading.style.display = 'none';
-                elements.resourceContent.innerHTML = `Crisis resources for ${country}${region ? ' - ' + region : ''}\n\nSample crisis support resources would be displayed here based on the selected location and crisis type.\n\nThis is a demo - in the actual implementation, this would connect to a database of real crisis resources.`;
-                elements.results.style.display = 'block';
-                elements.results.classList.remove('error');
-                
-                // Scroll to results
-                elements.results.scrollIntoView({ behavior: 'smooth' });
-            }, 2000);
-        });
+// Make request to Netlify Function
+fetch('/.netlify/functions/crisis-resources', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+        country: country,
+        region: region,
+        crisisType: crisisType
+    })
+})
+.then(response => response.json())
+.then(data => {
+    elements.loading.style.display = 'none';
+    elements.resourceContent.innerHTML = data.resources;
+    elements.results.style.display = 'block';
+    elements.results.classList.remove('error');
+    
+    // Scroll to results
+    elements.results.scrollIntoView({ behavior: 'smooth' });
+})
+.catch(error => {
+    elements.loading.style.display = 'none';
+    elements.resourceContent.innerHTML = '<h3>❌ Error Loading Resources</h3><p>Please try again or contact emergency services directly. If this continues, there may be a technical issue with the service.</p>';
+    elements.results.style.display = 'block';
+    elements.results.classList.add('error');
+    console.error('Error:', error);
+});
 
         // Initialize step indicator
         updateStepIndicator(1);
